@@ -1,0 +1,26 @@
+[package]
+name = "enum2schema"
+version = "0.1.0"
+authors = ["Matthew Berger <matthewjordanberger@gmail.com>"]
+description = """
+enum2schema is a rust derive macro that emits a JSON Schema describing a rust type, including doc-comment descriptions, externally tagged enum variants, and field types.
+"""
+homepage = "https://github.com/matthewjberger/enum2schema"
+repository = "https://github.com/matthewjberger/enum2schema"
+documentation = "https://docs.rs/enum2schema"
+readme = "README.md"
+keywords = ["enum", "macro", "schema", "json-schema"]
+categories = ["encoding", "data-structures"]
+license = "MIT"
+edition = "2024"
+
+[dependencies]
+serde_json = "1"
+enum2schema_derive = { version = "0.1.0", path = "enum2schema_derive" }
+
+[dev-dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[workspace]
+members = ["enum2schema_derive"]
