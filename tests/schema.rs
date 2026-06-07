@@ -502,6 +502,81 @@ fn nested_types_wire_round_trip() {
     );
 }
 
+/// A message; the internal variant is not advertised in the schema.
+#[derive(Schema, Serialize)]
+enum Message {
+    Ping,
+    Echo {
+        text: String,
+    },
+    #[schema(skip)]
+    Internal(u32),
+}
+
+#[test]
+fn skip_omits_data_enum_variant() {
+    assert_eq!(
+        Message::schema(),
+        json!({
+            "description": "A message; the internal variant is not advertised in the schema.",
+            "oneOf": [
+                { "type": "string", "const": "Ping" },
+                {
+                    "type": "object",
+                    "properties": {
+                        "Echo": {
+                            "type": "object",
+                            "properties": { "text": { "type": "string" } },
+                            "required": ["text"]
+                        }
+                    },
+                    "required": ["Echo"]
+                }
+            ]
+        })
+    );
+}
+
+#[test]
+fn skipped_variant_still_serializes() {
+    assert_eq!(serde_json::to_value(Message::Ping).unwrap(), json!("Ping"));
+    assert_eq!(
+        serde_json::to_value(Message::Echo {
+            text: "hi".to_string()
+        })
+        .unwrap(),
+        json!({ "Echo": { "text": "hi" } })
+    );
+    assert_eq!(
+        serde_json::to_value(Message::Internal(5)).unwrap(),
+        json!({ "Internal": 5 })
+    );
+}
+
+#[derive(Schema, Serialize)]
+#[schema(string_enum)]
+enum Mode {
+    On,
+    Off,
+    #[schema(skip)]
+    Debug,
+}
+
+#[test]
+fn skip_omits_string_enum_variant() {
+    assert_eq!(
+        Mode::schema(),
+        json!({ "type": "string", "enum": ["On", "Off"] })
+    );
+}
+
+#[test]
+fn skipped_string_enum_variant_still_serializes() {
+    assert_eq!(serde_json::to_value(Mode::On).unwrap(), json!("On"));
+    assert_eq!(serde_json::to_value(Mode::Off).unwrap(), json!("Off"));
+    assert_eq!(serde_json::to_value(Mode::Debug).unwrap(), json!("Debug"));
+}
+
 #[test]
 fn btreemap_is_object_with_additional_properties() {
     assert_eq!(

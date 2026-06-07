@@ -50,6 +50,9 @@ fn expand(input: DeriveInput) -> syn::Result<TokenStream2> {
             if container_schema.string_enum {
                 let mut tags = Vec::new();
                 for variant in &data.variants {
+                    if parse_field_schema_attrs(&variant.attrs)?.skip {
+                        continue;
+                    }
                     if !matches!(variant.fields, Fields::Unit) {
                         return Err(syn::Error::new(
                             variant.span(),
@@ -84,6 +87,9 @@ fn expand(input: DeriveInput) -> syn::Result<TokenStream2> {
             } else {
                 let mut variants = Vec::new();
                 for variant in &data.variants {
+                    if parse_field_schema_attrs(&variant.attrs)?.skip {
+                        continue;
+                    }
                     variants.push(variant_schema_expr(
                         variant,
                         container.rename_all.as_deref(),

@@ -8,6 +8,19 @@
 
 It carries `///` doc comments into `description`, models enums with serde's default externally tagged representation, and maps Rust types to their JSON Schema equivalents. Leaf types that should not derive `Schema`, such as math types or fixed color arrays, are described with field attributes.
 
+## Why not schemars?
+
+[schemars](https://crates.io/crates/schemars) is the mature, full-featured choice: it covers the entire serde representation matrix (internally, adjacently, and untagged enums), emits draft-compliant schemas with `$ref`/`$defs` for shared and recursive types, and has a large ecosystem of integrations. If you need any of that, use it.
+
+`enum2schema` is deliberately smaller, for the common case where a schema exists so a person or an agent can read it (for example an MCP tool `inputSchema`):
+
+- **Tiny dependency.** Just `serde_json` and a derive. There is no heavy schema runtime to pull into, say, a game engine or a wasm worker that only needs to describe a handful of components.
+- **Inline, not `$ref`.** Every schema is self-contained, which is easier for an LLM (or a human) to read than a document of `$ref`s into a `definitions` table. The trade-off is that recursive types must drop the recursive edge with `#[schema(skip)]`; enum2schema does not emit `$ref`, so it cannot describe an unbounded cycle.
+- **Built for non-deriving leaf types.** Math vectors, quaternions, matrices, and fixed color arrays are described in place with `#[schema(type = "array", items = "number", len = 3)]` or `#[schema(with = ...)]`, so you do not need newtype wrappers or upstream `JsonSchema` impls for types like `nalgebra`'s.
+- **One representation, matched to serde.** It models serde's default externally tagged enums (plus a `string_enum` mode) and respects `rename`, `rename_all`, and `default`. It intentionally does not handle the other serde tag modes; if your types use them, prefer schemars.
+
+In short: reach for schemars when you need full JSON Schema fidelity or recursive `$ref` output; reach for enum2schema when you want a small, inline, serde-matched schema next to the type, especially with math leaf types.
+
 ## Usage
 
 Add this to your `Cargo.toml`:
@@ -68,7 +81,7 @@ Field attributes:
 - `#[schema(with = path::to::fn)]` uses `path::to::fn()` (returning `serde_json::Value`) as the field schema.
 - `#[schema(type = "array", items = "number", len = 3)]` describes a fixed shape for a type that does not implement `Schema`.
 - `#[schema(description = "...")]` sets or overrides the description.
-- `#[schema(skip)]` omits the field.
+- `#[schema(skip)]` omits the field, or, on an enum variant, omits that variant from the schema (serde still serializes it). Use it to drop a recursive variant so an otherwise cyclic type can derive `Schema`.
 
 Container attribute:
 
