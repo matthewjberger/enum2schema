@@ -148,7 +148,7 @@ macro_rules! impl_tuple_schema {
             fn schema() -> Value {
                 json!({
                     "type": "array",
-                    "items": [ $( $name::schema() ),+ ],
+                    "prefixItems": [ $( $name::schema() ),+ ],
                     "minItems": $count,
                     "maxItems": $count
                 })

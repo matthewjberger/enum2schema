@@ -268,7 +268,7 @@ fn variant_schema_expr(
                             enum2schema::serde_json::Value::String("array".to_string()),
                         );
                         __array.insert(
-                            "items".to_string(),
+                            "prefixItems".to_string(),
                             enum2schema::serde_json::Value::Array(vec![ #(#item_schemas),* ]),
                         );
                         __array.insert(
