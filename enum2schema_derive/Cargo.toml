@@ -1,6 +1,6 @@
 [package]
 name = "enum2schema_derive"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Matthew Berger <matthewjordanberger@gmail.com>"]
 description = "Derive macro implementation for enum2schema."
 homepage = "https://github.com/matthewjberger/enum2schema"

@@ -640,3 +640,42 @@ fn component_bag_and_pair_list_schema_and_wire() {
         })
     );
 }
+
+fn token_schema() -> serde_json::Value {
+    json!({
+        "type": "object",
+        "properties": { "id": { "type": "integer" } },
+        "required": ["id"]
+    })
+}
+
+#[derive(Schema, Serialize)]
+enum Reference {
+    Token(#[schema(with = token_schema)] u64),
+    Index(u32),
+}
+
+#[test]
+fn with_override_applies_to_tuple_variant_field() {
+    assert_eq!(
+        Reference::schema(),
+        json!({
+            "oneOf": [
+                { "type": "object", "properties": { "Token": token_schema() }, "required": ["Token"] },
+                { "type": "object", "properties": { "Index": { "type": "integer" } }, "required": ["Index"] }
+            ]
+        })
+    );
+}
+
+#[test]
+fn with_override_tuple_variant_wire_format_matches_tags() {
+    assert_eq!(
+        serde_json::to_value(Reference::Token(7)).unwrap(),
+        json!({ "Token": 7 })
+    );
+    assert_eq!(
+        serde_json::to_value(Reference::Index(3)).unwrap(),
+        json!({ "Index": 3 })
+    );
+}

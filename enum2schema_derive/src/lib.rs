@@ -250,8 +250,9 @@ fn variant_schema_expr(
         Fields::Unnamed(unnamed) => {
             let unnamed_fields: Vec<_> = unnamed.unnamed.iter().collect();
             if unnamed_fields.len() == 1 {
-                let field_type = &unnamed_fields[0].ty;
-                let inner = quote! { <#field_type as enum2schema::Schema>::schema() };
+                let field = unnamed_fields[0];
+                let field_attrs = parse_field_schema_attrs(&field.attrs)?;
+                let inner = field_schema_expr(&field.ty, &field_attrs);
                 wrap_externally_tagged(&tag_lit, inner)
             } else {
                 let count = unnamed_fields.len() as u64;
