@@ -81,7 +81,7 @@ fn mixed_enum_yields_externally_tagged_forms() {
                     "properties": {
                         "Pair": {
                             "type": "array",
-                            "items": [{ "type": "integer" }, { "type": "integer" }],
+                            "prefixItems": [{ "type": "integer" }, { "type": "integer" }],
                             "minItems": 2,
                             "maxItems": 2
                         }
@@ -355,7 +355,7 @@ fn value_tuple_and_map_leaf_schemas() {
         <(String, u32) as Schema>::schema(),
         json!({
             "type": "array",
-            "items": [{ "type": "string" }, { "type": "integer" }],
+            "prefixItems": [{ "type": "string" }, { "type": "integer" }],
             "minItems": 2,
             "maxItems": 2
         })
@@ -616,7 +616,7 @@ fn component_bag_and_pair_list_schema_and_wire() {
                     "type": "array",
                     "items": {
                         "type": "array",
-                        "items": [{ "type": "string" }, {}],
+                        "prefixItems": [{ "type": "string" }, {}],
                         "minItems": 2,
                         "maxItems": 2
                     }
